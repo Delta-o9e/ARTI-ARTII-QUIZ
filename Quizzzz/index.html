@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Resonance Theory Quiz</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#f8fafc;min-height:100vh}
+    .wrap{max-width:900px;margin:auto;padding:32px 18px}.card{background:rgba(15,23,42,.88);border:1px solid #334155;border-radius:24px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    h1{font-size:clamp(28px,5vw,46px);margin:0 0 8px}.sub{color:#94a3b8;margin-bottom:25px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.progress{height:9px;background:#334155;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:#38bdf8;transition:.3s}
+    .qno{color:#38bdf8;font-weight:700}.question{font-size:clamp(20px,3vw,28px);line-height:1.35;margin:25px 0}
+    .options{display:grid;gap:12px}.option{width:100%;text-align:left;padding:17px;border:1px solid #475569;background:#1e293b;color:#f8fafc;border-radius:14px;cursor:pointer;font-size:16px;transition:.2s}.option:hover{border-color:#38bdf8;transform:translateY(-1px)}
+    .option.correct{border-color:#22c55e;background:rgba(34,197,94,.14)}.option.wrong{border-color:#ef4444;background:rgba(239,68,68,.14)}.feedback{margin-top:16px;padding:15px;border-radius:12px;background:#0b1220;color:#cbd5e1;display:none;line-height:1.5}
+    .controls{display:flex;justify-content:space-between;gap:10px;margin-top:22px}.btn{border:0;border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer;background:#38bdf8;color:#082f49}.btn.secondary{background:#334155;color:#f8fafc}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .result{text-align:center;display:none}.score{font-size:64px;font-weight:800;color:#38bdf8;margin:15px}.review{margin-top:22px;text-align:left}.review div{padding:10px;border-bottom:1px solid #334155}
+    .hint{margin-top:15px;color:#94a3b8;font-size:14px}.badge{background:#334155;padding:7px 11px;border-radius:999px;font-size:13px}
+  </style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div id="quiz">
+    <div class="top"><span class="qno" id="qno"></span><span class="badge" id="score">Score: 0/10</span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <h1>Adaptive Resonance Theory</h1>
+    <div class="sub">ART I • ART II • ARTMAP | Interactive PPT Quiz</div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="hint" id="hint"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="controls"><button class="btn secondary" id="restart">Restart</button><button class="btn" id="next" disabled>Next Question →</button></div>
+  </div>
+  <div class="result" id="result">
+    <h1>Quiz Complete!</h1><div class="score" id="finalScore"></div><p id="message"></p>
+    <div class="review" id="review"></div>
+    <button class="btn" onclick="location.reload()">Try Again</button>
+  </div>
+</div></div>
+<script>
+const questions=[
+["What is the main problem that Adaptive Resonance Theory is designed to address?",["Stability–plasticity dilemma","Overfitting–underfitting dilemma","Exploration–exploitation dilemma","Bias–variance dilemma"],0,"ART balances learning new patterns with retaining previously learned knowledge."],
+["In the general ART architecture, which field receives and represents the current input pattern?",["F1 Comparison Field","F2 Recognition Field","Map Field","Orienting Subsystem"],0,"F1 is the comparison field and receives the current input pattern."],
+["What happens when the similarity between the selected category and the input satisfies the vigilance criterion?",["Resonance occurs and learning takes place","The selected category is immediately reset","The network stops creating categories permanently","The input is discarded"],0,"A sufficient match produces resonance and the category is updated through learning."],
+["What type of input patterns is ART I primarily designed to handle?",["Binary or discrete patterns","Continuous analog patterns","Only labeled target patterns","Only audio signals"],0,"ART I is primarily designed for binary input patterns."],
+["In ART I, what does a high vigilance parameter generally produce?",["More specific categories","Broader categories","No category formation","Supervised target categories"],0,"Higher vigilance requires a closer match, producing more specific categories."],
+["Which ART model extends the ART concept to continuous or analog-valued patterns?",["ART II","ART I","ARTMAP","F2 ART"],0,"ART II handles continuous or analog-valued patterns."],
+["What is the main purpose of the Map Field in ARTMAP?",["Connect input categories with target categories","Normalize analog input values","Receive the original input vector","Perform the vigilance test alone"],0,"The Map Field connects ARTa categories with ARTb target categories."],
+["In ARTMAP, what happens when the selected input category predicts the wrong target?",["Match tracking increases effective vigilance","The target is permanently ignored","The input is automatically classified as correct","ARTa is removed from the network"],0,"Match tracking increases the effective vigilance requirement and searches for a better category."],
+["Which of the following is an application of Adaptive Resonance Theory?",["Fault detection","Cryptographic key generation","Database transaction locking","Compiler optimization"],0,"Fault detection is listed as an ART application in the PPT."],
+["What is a potential limitation of using a very high vigilance value in ART?",["It may create too many categories","It always combines separate patterns","It eliminates incremental learning","It prevents resonance in every case"],0,"High vigilance can create too many, highly specific categories."]
+];
+let i=0,score=0,answered=false,history=[];
+const $=id=>document.getElementById(id);
+function render(){
+ answered=false;$("next").disabled=true;$("feedback").style.display="none";
+ const q=questions[i];$("qno").textContent=`Question ${i+1} of ${questions.length}`;
+ $("question").textContent=q[0];$("hint").textContent="Hint: Identify the concept being tested and compare each option with its conditions.";
+ $("score").textContent=`Score: ${score}/${questions.length}`;$("bar").style.width=`${i/questions.length*100}%`;
+ $("options").innerHTML=q[1].map((x,n)=>`<button class="option" data-n="${n}"><b>${String.fromCharCode(65+n)}.</b> ${x}</button>`).join("");
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>choose(+b.dataset.n));
+}
+function choose(n){
+ if(answered)return; answered=true; const q=questions[i], ok=n===q[2]; if(ok)score++;
+ history.push({q:q[0],selected:q[1][n],correct:q[1][q[2]],ok});
+ document.querySelectorAll(".option").forEach((b,k)=>{b.disabled=true;if(k===q[2])b.classList.add("correct");if(k===n&&!ok)b.classList.add("wrong")});
+ $("feedback").textContent=ok?"Correct! "+q[3]:"Not quite. "+q[3];$("feedback").style.display="block";$("next").disabled=false;$("score").textContent=`Score: ${score}/${questions.length}`;
+}
+$("next").onclick=()=>{if(i<questions.length-1){i++;render()}else finish()};
+$("restart").onclick=()=>{i=0;score=0;history=[];$("result").style.display="none";$("quiz").style.display="block";render()};
+function finish(){
+ $("bar").style.width="100%";$("quiz").style.display="none";$("result").style.display="block";
+ $("finalScore").textContent=`${score}/10`;
+ $("message").textContent=score===10?"Perfect score! Bingooo! 🎯":score>=8?"Excellent work!":"Good attempt — revise the key ART concepts and try again.";
+ $("review").innerHTML=history.map((x,n)=>`<div><b>${n+1}. ${x.ok?"✓":"✗"} ${x.q}</b><br>Your answer: ${x.selected}<br>Correct answer: ${x.correct}</div>`).join("");
+}
+render();
+</script>
+</body></html>
